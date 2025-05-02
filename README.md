@@ -11,6 +11,7 @@ Book Manager là một ứng dụng web đơn giản để quản lý sách (CRU
 
 - Node.js >= 16
 - SQL Server đã cài và khởi động sẵn
+- Live Server 
 
 ---
 
