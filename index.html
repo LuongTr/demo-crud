@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Book Manager</h1>
+        
+        <!-- Book Form -->
+        <div class="form-container">
+            <h2 id="form-title">Add New Book</h2>
+            <form id="book-form">
+                <input type="hidden" id="book-id">
+                
+                <div class="form-group">
+                    <label for="title">Title:</label>
+                    <input type="text" id="title" placeholder="Enter book title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="author">Author:</label>
+                    <input type="text" id="author" placeholder="Enter author name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="year">Year:</label>
+                    <input type="number" id="year" placeholder="Publication year" required min="0" max="2100">
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" id="submit-btn">Add Book</button>
+                    <button type="button" id="cancel-btn" class="hidden">Cancel</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Book List -->
+        <div class="books-container">
+            <h2>Book List</h2>
+            <div class="loading" id="loading">Loading books...</div>
+            <div id="error-message" class="error hidden"></div>
+            
+            <table id="books-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Year</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="books-list">
+                    <!-- Books will be loaded here -->
+                </tbody>
+            </table>
+            
+            <div id="no-books" class="hidden">No books found. Add a new book!</div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
