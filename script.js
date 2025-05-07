@@ -1,128 +1,119 @@
-// API Base URL
-const API_URL = 'http://localhost:3000/api/books';
+const API_URL = 'http://localhost:3000/api/employees';
 
 // DOM Elements
-const bookForm = document.getElementById('book-form');
+const employeeForm = document.getElementById('employee-form');
 const formTitle = document.getElementById('form-title');
-const bookIdInput = document.getElementById('book-id');
-const titleInput = document.getElementById('title');
-const authorInput = document.getElementById('author');
-const yearInput = document.getElementById('year');
+const employeeIdInput = document.getElementById('employee-id');
+const nameInput = document.getElementById('name');
+const positionInput = document.getElementById('position');
+const salaryInput = document.getElementById('salary');
 const submitBtn = document.getElementById('submit-btn');
 const cancelBtn = document.getElementById('cancel-btn');
-const booksList = document.getElementById('books-list');
+const employeesList = document.getElementById('employees-list');
 const loadingElement = document.getElementById('loading');
 const errorMessage = document.getElementById('error-message');
-const noBooks = document.getElementById('no-books');
-const booksTable = document.getElementById('books-table');
+const noEmployees = document.getElementById('no-employees');
+const employeesTable = document.getElementById('employees-table');
+const searchInput = document.getElementById('search-input');
+let allEmployees = []; // Store all employees for filtering
 
-// State management
 let isEditing = false;
 
-// Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
-    fetchBooks();
+    fetchEmployees();
     setupEventListeners();
 });
 
-// Set up event listeners
 function setupEventListeners() {
-    bookForm.addEventListener('submit', handleFormSubmit);
+    employeeForm.addEventListener('submit', handleFormSubmit);
     cancelBtn.addEventListener('click', resetForm);
+    searchInput.addEventListener('input', handleSearch);
 }
 
-// Fetch all books from the API
-async function fetchBooks() {
+async function fetchEmployees() {
     try {
         showLoading(true);
-        
         const response = await fetch(API_URL);
         
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
         
-        const books = await response.json();
-        
+        const employees = await response.json();
+        allEmployees = employees; // Store all employees
         showLoading(false);
-        displayBooks(books);
+        displayEmployees(employees);
     } catch (error) {
         showLoading(false);
-        showError(`Failed to fetch books: ${error.message}`);
-        console.error('Error fetching books:', error);
+        showError(`Failed to fetch employees: ${error.message}`);
+        console.error('Error fetching employees:', error);
     }
 }
 
-// Display books in the table
-function displayBooks(books) {
-    if (books.length === 0) {
-        booksTable.classList.add('hidden');
-        noBooks.classList.remove('hidden');
+function displayEmployees(employees) {
+    if (employees.length === 0) {
+        employeesTable.classList.add('hidden');
+        noEmployees.classList.remove('hidden');
         return;
     }
     
-    booksTable.classList.remove('hidden');
-    noBooks.classList.add('hidden');
+    employeesTable.classList.remove('hidden');
+    noEmployees.classList.add('hidden');
     
-    booksList.innerHTML = books.map(book => `
+    employeesList.innerHTML = employees.map(employee => `
         <tr>
-            <td>${book.Id}</td>
-            <td>${escapeHtml(book.Title)}</td>
-            <td>${escapeHtml(book.Author)}</td>
-            <td>${book.Year}</td>
+            <td>${employee.Id}</td>
+            <td>${escapeHtml(employee.Name)}</td>
+            <td>${escapeHtml(employee.Position)}</td>
+            <td>$${employee.Salary.toFixed(2)}</td>
             <td>
-                <button class="action-btn edit-btn" data-id="${book.Id}">Edit</button>
-                <button class="action-btn delete-btn" data-id="${book.Id}">Delete</button>
+                <button class="action-btn edit-btn" data-id="${employee.Id}">Edit</button>
+                <button class="action-btn delete-btn" data-id="${employee.Id}">Delete</button>
             </td>
         </tr>
     `).join('');
     
-    // Add event listeners to the action buttons
     document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', () => editBook(parseInt(btn.dataset.id)));
+        btn.addEventListener('click', () => editEmployee(parseInt(btn.dataset.id)));
     });
     
     document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', () => deleteBook(parseInt(btn.dataset.id)));
+        btn.addEventListener('click', () => deleteEmployee(parseInt(btn.dataset.id)));
     });
 }
 
-// Handle form submission (Add/Update book)
 async function handleFormSubmit(event) {
     event.preventDefault();
     
-    const bookData = {
-        Title: titleInput.value,
-        Author: authorInput.value,
-        Year: parseInt(yearInput.value)
+    const employeeData = {
+        Name: nameInput.value,
+        Position: positionInput.value,
+        Salary: parseFloat(salaryInput.value)
     };
     
     try {
         if (isEditing) {
-            // Update existing book
-            const bookId = parseInt(bookIdInput.value);
-            await updateBook(bookId, bookData);
+            const employeeId = parseInt(employeeIdInput.value);
+            await updateEmployee(employeeId, employeeData);
         } else {
-            // Add new book
-            await addBook(bookData);
+            await addEmployee(employeeData);
         }
         
         resetForm();
-        fetchBooks();
+        fetchEmployees();
     } catch (error) {
-        showError(`Failed to ${isEditing ? 'update' : 'add'} book: ${error.message}`);
-        console.error(`Error ${isEditing ? 'updating' : 'adding'} book:`, error);
+        showError(`Failed to ${isEditing ? 'update' : 'add'} employee: ${error.message}`);
+        console.error(`Error ${isEditing ? 'updating' : 'adding'} employee:`, error);
     }
 }
 
-// Add a new book
-async function addBook(bookData) {
+async function addEmployee(employeeData) {
     const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(bookData)
+        body: JSON.stringify(employeeData)
     });
     
     if (!response.ok) {
@@ -133,14 +124,13 @@ async function addBook(bookData) {
     return response.json();
 }
 
-// Update an existing book
-async function updateBook(id, bookData) {
+async function updateEmployee(id, employeeData) {
     const response = await fetch(`${API_URL}/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(bookData)
+        body: JSON.stringify(employeeData)
     });
     
     if (!response.ok) {
@@ -151,9 +141,8 @@ async function updateBook(id, bookData) {
     return response.json();
 }
 
-// Delete a book
-async function deleteBook(id) {
-    if (!confirm('Are you sure you want to delete this book?')) {
+async function deleteEmployee(id) {
+    if (!confirm('Are you sure you want to delete this employee?')) {
         return;
     }
     
@@ -167,15 +156,14 @@ async function deleteBook(id) {
             throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
         }
         
-        fetchBooks();
+        fetchEmployees();
     } catch (error) {
-        showError(`Failed to delete book: ${error.message}`);
-        console.error('Error deleting book:', error);
+        showError(`Failed to delete employee: ${error.message}`);
+        console.error('Error deleting employee:', error);
     }
 }
 
-// Edit a book (populate form for editing)
-async function editBook(id) {
+async function editEmployee(id) {
     try {
         const response = await fetch(`${API_URL}/${id}`);
         
@@ -183,45 +171,40 @@ async function editBook(id) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
         
-        const book = await response.json();
+        const employee = await response.json();
         
-        // Populate form with book data
-        bookIdInput.value = book.Id;
-        titleInput.value = book.Title;
-        authorInput.value = book.Author;
-        yearInput.value = book.Year;
+        employeeIdInput.value = employee.Id;
+        nameInput.value = employee.Name;
+        positionInput.value = employee.Position;
+        salaryInput.value = employee.Salary;
         
-        // Change form state to editing mode
-        formTitle.textContent = 'Edit Book';
-        submitBtn.textContent = 'Update Book';
+        formTitle.textContent = 'Edit Employee';
+        submitBtn.textContent = 'Update Employee';
         cancelBtn.classList.remove('hidden');
         isEditing = true;
         
-        // Scroll to form
         document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth' });
     } catch (error) {
-        showError(`Failed to load book details: ${error.message}`);
-        console.error('Error fetching book details:', error);
+        showError(`Failed to load employee details: ${error.message}`);
+        console.error('Error fetching employee details:', error);
     }
 }
 
-// Reset form to its initial state
 function resetForm() {
-    bookForm.reset();
-    bookIdInput.value = '';
-    formTitle.textContent = 'Add New Book';
-    submitBtn.textContent = 'Add Book';
+    employeeForm.reset();
+    employeeIdInput.value = '';
+    formTitle.textContent = 'Add New Employee';
+    submitBtn.textContent = 'Add Employee';
     cancelBtn.classList.add('hidden');
     isEditing = false;
     errorMessage.classList.add('hidden');
 }
 
-// Utility functions
 function showLoading(isLoading) {
     if (isLoading) {
         loadingElement.classList.remove('hidden');
-        booksTable.classList.add('hidden');
-        noBooks.classList.add('hidden');
+        employeesTable.classList.add('hidden');
+        noEmployees.classList.add('hidden');
     } else {
         loadingElement.classList.add('hidden');
     }
@@ -235,7 +218,21 @@ function showError(message) {
     }, 5000);
 }
 
-// Helper function to escape HTML to prevent XSS
+function handleSearch(event) {
+    const searchTerm = event.target.value.toLowerCase();
+    
+    if (!searchTerm) {
+        displayEmployees(allEmployees);
+        return;
+    }
+    
+    const filteredEmployees = allEmployees.filter(employee => 
+        employee.Name.toLowerCase().includes(searchTerm) 
+    );
+    
+    displayEmployees(filteredEmployees);
+}
+
 function escapeHtml(unsafe) {
     return unsafe
         .replace(/&/g, "&amp;")

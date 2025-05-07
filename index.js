@@ -5,16 +5,14 @@ const cors = require('cors');
 const app = express();
 const PORT = 3000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// SQL Server Configuration
 const config = {
     user: 'sa',
     password: '260203',
     server: 'DESKTOP-UNPULAB',
-    database: 'BookDB',
+    database: 'EmployeeDB',
     options: {
         trustServerCertificate: true,
         encrypt: false,
@@ -51,124 +49,119 @@ connectToDatabase().catch(err => {
     console.error('Failed to connect to database on startup:', err);
 });
 
-// API Routes
-
-// Get all books
-app.get('/api/books', async (req, res) => {
+// Get all employees
+app.get('/api/employees', async (req, res) => {
     try {
         await connectToDatabase();
-        const result = await pool.request().query('SELECT * FROM Books ORDER BY Id DESC');
+        const result = await pool.request().query('SELECT * FROM Employees ORDER BY Id DESC');
         res.json(result.recordset);
     } catch (err) {
-        console.error('Error fetching books:', err);
-        res.status(500).json({ error: 'Failed to fetch books', details: err.message });
+        console.error('Error fetching employees:', err);
+        res.status(500).json({ error: 'Failed to fetch employees', details: err.message });
     }
 });
 
-// Get book by ID
-app.get('/api/books/:id', async (req, res) => {
+// Get employee by ID
+app.get('/api/employees/:id', async (req, res) => {
     try {
         const { id } = req.params;
         await connectToDatabase();
         
         const result = await pool.request()
             .input('id', sql.Int, id)
-            .query('SELECT * FROM Books WHERE Id = @id');
+            .query('SELECT * FROM Employees WHERE Id = @id');
             
         if (result.recordset.length === 0) {
-            return res.status(404).json({ message: 'Book not found' });
+            return res.status(404).json({ message: 'Employee not found' });
         }
         
         res.json(result.recordset[0]);
     } catch (err) {
-        console.error(`Error fetching book with ID ${req.params.id}:`, err);
-        res.status(500).json({ error: 'Failed to fetch book', details: err.message });
+        console.error(`Error fetching employee with ID ${req.params.id}:`, err);
+        res.status(500).json({ error: 'Failed to fetch employee', details: err.message });
     }
 });
 
-// Add new book
-app.post('/api/books', async (req, res) => {
+// Add new employee
+app.post('/api/employees', async (req, res) => {
     try {
-        const { Title, Author, Year } = req.body;
+        const { Name, Position, Salary } = req.body;
         
-        // Validate required fields
-        if (!Title || !Author || !Year) {
-            return res.status(400).json({ error: 'Title, Author and Year are required' });
+        if (!Name || !Position || !Salary) {
+            return res.status(400).json({ error: 'Name, Position and Salary are required' });
         }
         
         await connectToDatabase();
         
         const result = await pool.request()
-            .input('title', sql.NVarChar, Title)
-            .input('author', sql.NVarChar, Author)
-            .input('year', sql.Int, Year)
-            .query('INSERT INTO Books (Title, Author, Year) OUTPUT INSERTED.* VALUES (@title, @author, @year)');
+            .input('name', sql.NVarChar, Name)
+            .input('position', sql.NVarChar, Position)
+            .input('salary', sql.Decimal(10,2), Salary)
+            .query('INSERT INTO Employees (Name, Position, Salary) OUTPUT INSERTED.* VALUES (@name, @position, @salary)');
             
         res.status(201).json(result.recordset[0]);
     } catch (err) {
-        console.error('Error adding new book:', err);
-        res.status(500).json({ error: 'Failed to add book', details: err.message });
+        console.error('Error adding new employee:', err);
+        res.status(500).json({ error: 'Failed to add employee', details: err.message });
     }
 });
 
-// Update book
-app.put('/api/books/:id', async (req, res) => {
+// Update employee
+app.put('/api/employees/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { Title, Author, Year } = req.body;
+        const { Name, Position, Salary } = req.body;
         
-        // Validate required fields
-        if (!Title || !Author || !Year) {
-            return res.status(400).json({ error: 'Title, Author and Year are required' });
+        if (!Name || !Position || !Salary) {
+            return res.status(400).json({ error: 'Name, Position and Salary are required' });
         }
         
         await connectToDatabase();
         
         const result = await pool.request()
             .input('id', sql.Int, id)
-            .input('title', sql.NVarChar, Title)
-            .input('author', sql.NVarChar, Author)
-            .input('year', sql.Int, Year)
+            .input('name', sql.NVarChar, Name)
+            .input('position', sql.NVarChar, Position)
+            .input('salary', sql.Decimal(10,2), Salary)
             .query(`
-                UPDATE Books 
-                SET Title = @title, Author = @author, Year = @year 
+                UPDATE Employees 
+                SET Name = @name, Position = @position, Salary = @salary 
                 OUTPUT INSERTED.* 
                 WHERE Id = @id
             `);
             
         if (result.recordset.length === 0) {
-            return res.status(404).json({ message: 'Book not found' });
+            return res.status(404).json({ message: 'Employee not found' });
         }
         
         res.json(result.recordset[0]);
     } catch (err) {
-        console.error(`Error updating book with ID ${req.params.id}:`, err);
-        res.status(500).json({ error: 'Failed to update book', details: err.message });
+        console.error(`Error updating employee with ID ${req.params.id}:`, err);
+        res.status(500).json({ error: 'Failed to update employee', details: err.message });
     }
 });
 
-// Delete book
-app.delete('/api/books/:id', async (req, res) => {
+// Delete employee
+app.delete('/api/employees/:id', async (req, res) => {
     try {
         const { id } = req.params;
         await connectToDatabase();
         
         const result = await pool.request()
             .input('id', sql.Int, id)
-            .query('DELETE FROM Books OUTPUT DELETED.* WHERE Id = @id');
+            .query('DELETE FROM Employees OUTPUT DELETED.* WHERE Id = @id');
             
         if (result.recordset.length === 0) {
-            return res.status(404).json({ message: 'Book not found' });
+            return res.status(404).json({ message: 'Employee not found' });
         }
         
-        res.json({ message: 'Book deleted successfully', deletedBook: result.recordset[0] });
+        res.json({ message: 'Employee deleted successfully', deletedEmployee: result.recordset[0] });
     } catch (err) {
-        console.error(`Error deleting book with ID ${req.params.id}:`, err);
-        res.status(500).json({ error: 'Failed to delete book', details: err.message });
+        console.error(`Error deleting employee with ID ${req.params.id}:`, err);
+        res.status(500).json({ error: 'Failed to delete employee', details: err.message });
     }
 });
 
-// Start server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });

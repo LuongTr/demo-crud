@@ -73,13 +73,13 @@ button {
 }
 
 #submit-btn {
-    background-color: #3498db;
+    background-color: #2ecc71;
     color: white;
     flex: 1;
 }
 
 #submit-btn:hover {
-    background-color: #2980b9;
+    background-color: #27ae60;
 }
 
 #cancel-btn {
@@ -93,7 +93,7 @@ button {
 }
 
 /* Table Styles */
-.books-container {
+.employees-container {
     background-color: white;
     padding: 25px;
     border-radius: 8px;
@@ -169,9 +169,28 @@ tr:hover {
     margin-bottom: 20px;
 }
 
-#no-books {
+#no-employees {
     text-align: center;
     padding: 20px;
     font-style: italic;
     color: #7f8c8d;
+}
+
+.search-container {
+    margin-bottom: 20px;
+}
+
+#search-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+#search-input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
 }

@@ -1,18 +1,18 @@
-CREATE DATABASE BookDB;
+CREATE DATABASE EmployeeDB;
 GO
 
-USE BookDB;
+USE EmployeeDB;
 GO
 
-CREATE TABLE Books (
+CREATE TABLE Employees (
     Id INT IDENTITY(1,1) PRIMARY KEY,
-    Title NVARCHAR(100),
-    Author NVARCHAR(100),
-    Year INT
+    Name NVARCHAR(100),
+    Position NVARCHAR(100),
+    Salary DECIMAL(10,2)
 );
 
-SELECT * FROM Books;
+SELECT * FROM Employees;
 
-INSERT INTO books (title, author, year)
-VALUES ('Harry Potter', 'J.K. Rowling', 2003);
+INSERT INTO Employees (Name, Position, Salary)
+VALUES ('John Doe', 'Software Engineer', 50000.00);
 
