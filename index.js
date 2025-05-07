@@ -20,15 +20,6 @@ const config = {
     }
 };
 
-sql.connect(config).then(pool => {
-    return pool.request().query('SELECT 1 AS test');
-}).then(result => {
-    console.log('✅ Kết nối thành công:', result.recordset);
-}).catch(err => {
-    console.error('❌ Kết nối thất bại:', err);
-});
-
-// Database Connection Pool
 let pool;
 async function connectToDatabase() {
     try {
@@ -44,6 +35,14 @@ async function connectToDatabase() {
     }
 }
 
+// Get next available ID
+async function getNextId() {
+    const pool = await connectToDatabase();
+    const result = await pool.request()
+        .query('SELECT MAX(Id) as maxId FROM Employees');
+    return (result.recordset[0].maxId || 0) + 1;
+}
+
 // Test connection on startup
 connectToDatabase().catch(err => {
     console.error('Failed to connect to database on startup:', err);
@@ -53,7 +52,7 @@ connectToDatabase().catch(err => {
 app.get('/api/employees', async (req, res) => {
     try {
         await connectToDatabase();
-        const result = await pool.request().query('SELECT * FROM Employees ORDER BY Id DESC');
+        const result = await pool.request().query('SELECT * FROM Employees ORDER BY Id ASC');
         res.json(result.recordset);
     } catch (err) {
         console.error('Error fetching employees:', err);
@@ -82,7 +81,7 @@ app.get('/api/employees/:id', async (req, res) => {
     }
 });
 
-// Add new employee
+// Add new employee with manual ID
 app.post('/api/employees', async (req, res) => {
     try {
         const { Name, Position, Salary } = req.body;
@@ -91,15 +90,17 @@ app.post('/api/employees', async (req, res) => {
             return res.status(400).json({ error: 'Name, Position and Salary are required' });
         }
         
+        const newId = await getNextId();
         await connectToDatabase();
         
         const result = await pool.request()
+            .input('id', sql.Int, newId)
             .input('name', sql.NVarChar, Name)
             .input('position', sql.NVarChar, Position)
             .input('salary', sql.Decimal(10,2), Salary)
-            .query('INSERT INTO Employees (Name, Position, Salary) OUTPUT INSERTED.* VALUES (@name, @position, @salary)');
+            .query('INSERT INTO Employees (Id, Name, Position, Salary) VALUES (@id, @name, @position, @salary)');
             
-        res.status(201).json(result.recordset[0]);
+        res.status(201).json({ Id: newId, Name, Position, Salary });
     } catch (err) {
         console.error('Error adding new employee:', err);
         res.status(500).json({ error: 'Failed to add employee', details: err.message });
