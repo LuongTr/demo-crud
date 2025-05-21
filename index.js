@@ -9,9 +9,9 @@ app.use(cors());
 app.use(express.json());
 
 const config = {
-    user: 'sa',
-    password: '260203',
-    server: 'DESKTOP-UNPULAB',
+    user: 'sa',                 // SQL Server username của bạn
+    password: '260203',         // SQL Server password của bạn
+    server: 'DESKTOP-UNPULAB',  // SQL Server name
     database: 'EmployeeDB',
     options: {
         trustServerCertificate: true,
