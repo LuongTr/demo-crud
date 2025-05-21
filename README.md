@@ -40,7 +40,8 @@ npm install
 
 - Mở file `index.js`
 - Cập nhật thông tin kết nối SQL Server phù hợp với máy bạn
-Trong file index.js ở mục config thay đổi cho phù hợp với sql máy bạn
+Trong file index.js ở mục config thay đổi cho phù hợp với sql máy bạn.
+
 ![image](https://github.com/user-attachments/assets/d61a5c2f-7f3a-45f1-b20b-a9b75ba9fd6a)
 
 <img width="449" alt="configSQL" src="https://github.com/user-attachments/assets/b9e065e3-8358-4ff1-b716-ba05295570e4" />
